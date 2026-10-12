@@ -1,0 +1,632 @@
+/* ── Theme-wave: circular reveal from toggle button ── */
+:root {
+    --wave-x: 50vw;
+    --wave-y: 50px;
+}
+
+@keyframes theme-wave-in {
+    from {
+        clip-path: circle(0% at var(--wave-x) var(--wave-y));
+    }
+
+    to {
+        clip-path: circle(150% at var(--wave-x) var(--wave-y));
+    }
+}
+
+/* New-theme snapshot expands as a ripple; old snapshot stays frozen beneath */
+::view-transition-new(root) {
+    animation: theme-wave-in 0.8s cubic-bezier(.65, 0, .25, 1) both;
+}
+
+::view-transition-old(root) {
+    animation: none;
+    z-index: -1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    ::view-transition-new(root),
+    ::view-transition-old(root) {
+        animation: none;
+    }
+}
+
+.portfolio-shell {
+    --hero-bg: #1b1b1b;
+    --hero-surface: #252525;
+    --hero-text: #f3f3f3;
+    --hero-muted: #b5b5b5;
+    --hero-border: #414141;
+    --hero-accent: #e9204f;
+
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    min-height: 100svh;
+    flex-direction: column;
+    overflow: hidden;
+    color: var(--hero-text);
+    background:
+        radial-gradient(ellipse at 50% 34%,
+            rgb(233 32 79 / 10%),
+            transparent 48%),
+        var(--hero-bg);
+    transition:
+        background 800ms ease,
+        background-color 800ms ease,
+        color 800ms ease;
+}
+
+.portfolio-shell::before {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background: repeating-linear-gradient(90deg,
+            transparent 0,
+            transparent calc(12.5% - 1px),
+            rgb(233 32 79 / 4%) calc(12.5% - 1px),
+            rgb(233 32 79 / 4%) 12.5%);
+    content: "";
+    pointer-events: none;
+    mask-image: linear-gradient(to bottom,
+            transparent 5%,
+            transparent 48%,
+            black 100%);
+}
+
+.portfolio-shell.theme-light {
+    --hero-bg: #f3f3f3;
+    --hero-surface: #ffffff;
+    --hero-text: #1b1b1b;
+    --hero-muted: #666666;
+    --hero-border: #d7d7d7;
+
+    background:
+        radial-gradient(ellipse at 50% 34%,
+            rgb(233 32 79 / 9%),
+            transparent 48%),
+        var(--hero-bg);
+}
+
+.navbar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 24px;
+    padding-block: 26px;
+    border-bottom: 1px solid rgb(243 243 243 / 8%);
+}
+
+.theme-light .navbar {
+    border-bottom-color: rgb(27 27 27 / 10%);
+}
+
+/* Smooth colour cross-fade on all themed children */
+.navbar,
+.navbar__brand,
+.navbar__links a,
+.navbar__contact,
+.hero-footer,
+.hero-footer a,
+.hero-footer p,
+.hero__title,
+.hero__description,
+.hero__button--primary,
+.hero__button--secondary {
+    transition:
+        color 800ms ease,
+        border-color 800ms ease,
+        background-color 800ms ease,
+        background 800ms ease;
+}
+
+.navbar__brand {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--hero-text);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.navbar__logo {
+    width: 48px;
+    height: 36px;
+    display: block;
+}
+
+
+
+.navbar__links {
+    justify-self: center;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
+
+.navbar__actions {
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.navbar__links a,
+.hero-footer a {
+    color: var(--hero-muted);
+    font-size: 13px;
+    text-decoration: none;
+    transition:
+        color 180ms ease;
+}
+
+.navbar__links a:hover,
+.hero-footer a:hover {
+    color: #ffffff;
+}
+
+.theme-light .navbar__links a:hover,
+.theme-light .navbar__links a:focus-visible,
+.theme-light .hero-footer a:hover,
+.theme-light .hero-footer a:focus-visible {
+    color: #e9204f;
+}
+
+/* ── Sun / Crescent moon toggle ── */
+.toggle {
+    --ease: cubic-bezier(.65, 0, .25, 1);
+    --dur: 1.2s;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform .25s var(--ease);
+}
+
+.toggle:active {
+    transform: scale(.88);
+}
+
+.toggle:focus-visible {
+    outline: 2px solid var(--hero-text);
+    outline-offset: 3px;
+}
+
+.toggle svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    overflow: visible;
+}
+
+/* Sun body — rotates & scales into crescent */
+.toggle .body-group {
+    transform-origin: 50px 50px;
+    transition: transform var(--dur) var(--ease);
+}
+
+.toggle .cut {
+    transform: translate(36px, -36px);
+    transition: transform var(--dur) var(--ease);
+}
+
+/* Rays */
+.toggle .ray {
+    stroke: var(--hero-accent);
+    stroke-width: 5;
+    stroke-linecap: round;
+    transform-origin: 50px 50px;
+    transform: rotate(calc(var(--i) * 45deg)) scale(1);
+    opacity: 1;
+    transition:
+        transform calc(var(--dur) * .75) var(--ease),
+        opacity calc(var(--dur) * .75) var(--ease);
+    transition-delay: calc(var(--i) * 15ms);
+}
+
+/* Night (light-mode = aria-pressed true) */
+.toggle[aria-pressed="true"] .cut {
+    transform: translate(12px, -10px);
+}
+
+.toggle[aria-pressed="true"] .body-group {
+    transform: rotate(-20deg) scale(1.18);
+}
+
+.toggle[aria-pressed="true"] .ray {
+    transform: rotate(calc(var(--i) * 45deg + 60deg)) scale(.25);
+    opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .toggle,
+    .toggle .body-group,
+    .toggle .cut,
+    .toggle .ray {
+        transition-duration: .01ms !important;
+        transition-delay: 0s !important;
+    }
+}
+
+.navbar__contact {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 18px;
+    border: 1px solid var(--hero-accent);
+    border-radius: 999px;
+    background: var(--hero-accent);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition:
+        background 800ms ease,
+        background-color 800ms ease,
+        color 800ms ease,
+        border-color 800ms ease,
+        transform 180ms ease;
+}
+
+.navbar__contact:hover,
+.hero__button--primary:hover {
+    transform: translateY(-2px);
+    background: #ffffff;
+    color: #e9204f;
+}
+
+.hero {
+    display: grid;
+    flex: 1;
+    place-items: center;
+    padding: 76px 24px 88px;
+    text-align: center;
+}
+
+.hero__content {
+    width: 100%;
+    max-width: 850px;
+    margin-inline: auto;
+    animation: hero-enter 700ms ease both;
+}
+
+.hero__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 30px;
+    padding: 9px 15px;
+    border: 1px solid var(--hero-border);
+    border-radius: 999px;
+    color: var(--hero-muted);
+    font-size: 12px;
+    letter-spacing: 0.4px;
+}
+
+.hero__badge-dot,
+.hero-footer__dot {
+    width: 7px;
+    height: 7px;
+    flex: 0 0 7px;
+    border-radius: 50%;
+    background: var(--hero-accent);
+}
+
+.hero__badge-dot {
+    box-shadow: 0 0 12px rgb(233 32 79 / 60%);
+}
+
+.hero__title {
+    margin: 0;
+    color: var(--hero-text);
+    font-family: var(--font-display, "Fraunces", Georgia, serif);
+    font-size: clamp(3rem, 7.5vw, 6.5rem);
+    font-weight: 500;
+    line-height: 1.04;
+    letter-spacing: -0.055em;
+}
+
+.hero__title span {
+    color: var(--hero-accent);
+    font-style: italic;
+    font-weight: 400;
+}
+
+.hero__description {
+    max-width: 510px;
+    margin: 28px auto 0;
+    color: var(--hero-muted);
+    font-size: clamp(14px, 1.3vw, 16px);
+    line-height: 1.8;
+}
+
+.hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 34px;
+}
+
+.hero__button {
+    display: inline-flex;
+    min-height: 48px;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 0 22px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition:
+        background 800ms ease,
+        background-color 800ms ease,
+        border-color 800ms ease,
+        color 800ms ease,
+        transform 180ms ease;
+}
+
+.hero__button--primary {
+    background: var(--hero-accent);
+    color: #ffffff;
+}
+
+.hero__button--secondary {
+    border-color: var(--hero-border);
+    background: transparent;
+    color: var(--hero-text);
+}
+
+.hero__button--secondary:hover {
+    transform: translateY(-2px);
+    border-color: var(--hero-accent);
+    color: var(--hero-accent);
+}
+
+.hero-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding-block: 22px;
+    border-top: 1px solid rgb(243 243 243 / 8%);
+}
+
+.theme-light .hero-footer {
+    border-top-color: rgb(27 27 27 / 10%);
+}
+
+.hero-footer p {
+    margin: 0;
+    color: var(--hero-muted);
+    font-size: 11px;
+}
+
+.hero-footer__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.hero-footer__dot {
+    animation: status-pulse 2s ease-in-out infinite;
+}
+
+.hero-footer a {
+    font-size: 11px;
+}
+
+@keyframes hero-enter {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes status-pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgb(233 32 79 / 35%);
+    }
+
+    50% {
+        box-shadow: 0 0 0 5px rgb(233 32 79 / 0%);
+    }
+}
+
+@media (max-width: 760px) {
+    .navbar {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 18px;
+        padding-block: 18px;
+    }
+
+    .navbar__links {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        gap: clamp(16px, 5vw, 28px);
+        padding-top: 14px;
+        border-top: 1px solid rgb(243 243 243 / 8%);
+    }
+
+    .theme-light .navbar__links {
+        border-top-color: rgb(27 27 27 / 10%);
+    }
+
+    .navbar__links a {
+        font-size: 12px;
+    }
+
+    .navbar__actions {
+        gap: 9px;
+    }
+
+    .navbar__contact {
+        padding: 10px 13px;
+        font-size: 12px;
+    }
+
+    .hero {
+        padding: 80px 20px;
+    }
+
+    .hero__badge {
+        margin-bottom: 26px;
+    }
+
+    .hero__title {
+        font-size: clamp(2.8rem, 10vw, 5rem);
+    }
+
+    .hero__description {
+        max-width: 440px;
+    }
+
+    .hero-footer {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 14px 24px;
+        text-align: center;
+    }
+}
+
+@media (max-width: 420px) {
+    .navbar__name {
+        display: none;
+    }
+
+    .navbar__links {
+        gap: 17px;
+    }
+
+    .navbar__contact {
+        gap: 6px;
+    }
+
+    .hero__title {
+        font-size: clamp(2.5rem, 11vw, 3.4rem);
+    }
+
+    .hero__actions {
+        flex-direction: column;
+        align-items: stretch;
+        max-width: 250px;
+        margin-inline: auto;
+    }
+
+    .hero__button {
+        width: 100%;
+    }
+
+    .hero-footer {
+        flex-direction: column;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+
+/* Navigation typography */
+.navbar,
+.navbar a,
+.navbar button {
+    font-family: "Aeonik Pro", sans-serif;
+}
+
+.navbar__name {
+    font-size: 16px;
+}
+
+.navbar__links {
+    gap: 32px;
+}
+
+.navbar__links a {
+    font-size: 14px;
+}
+
+/* Remove the badge spacing and style the headline in Aeonik */
+.hero__title {
+    font-family: "Aeonik Pro", sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.055em;
+}
+
+/* Fraunces is reserved for this word */
+.hero__title span {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 400;
+    font-style: italic;
+}
+
+/* Slightly larger navigation contact button */
+.navbar__contact {
+    font-size: 14px;
+}
+
+/* Button hover states */
+.hero__button--primary {
+    border-color: #e9204f;
+    background: #e9204f;
+    color: #f3f3f3;
+}
+
+.hero__button--primary:hover {
+    border-color: #e9204f;
+    background: #e9204f;
+    color: #f3f3f3;
+}
+
+/* Keep button text in Aeonik */
+.hero__button {
+    font-family: "Aeonik Pro", sans-serif;
+}
+
+
+/* Get in touch button */
+.hero__button--primary,
+.navbar__contact {
+    background-color: #e9204f;
+    border-color: #e9204f;
+    color: #f3f3f3;
+}
+
+
+.hero__button--primary:hover,
+.hero__button--primary:focus-visible,
+.navbar__contact:hover,
+.navbar__contact:focus-visible {
+    background-color: #f3f3f3;
+    border-color: #e9204f;
+    color: #e9204f;
+}

@@ -5,6 +5,7 @@ import About from './components/About'
 import SkillBars from './components/SkillBars'
 import Projects from './components/Projects'
 import Contact from './components/Contact'
+import ScrollPath from './components/ScrollPath'
 import './App.css'
 
 function App() {
@@ -23,6 +24,8 @@ function App() {
   return (
     <div className={`portfolio-shell ${isLight ? 'theme-light' : ''}`}>
       <div className="portfolio-glow" aria-hidden="true" />
+
+      <ScrollPath />
 
       <main>
         <Hero

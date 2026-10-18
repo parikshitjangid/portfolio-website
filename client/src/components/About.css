@@ -104,3 +104,38 @@
         padding-top: 1.5rem;
     }
 }
+
+@media (max-width: 639px) {
+  .about {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+    padding-inline: 0.75rem;
+  }
+
+  .about__content {
+    width: 100%;
+    max-width: 100%;
+    padding-inline: 0.5rem;
+  }
+
+  .about__heading,
+  .about__header {
+    margin-top: 0;
+    margin-bottom: 1.25rem;
+    line-height: 1.2;
+  }
+
+  .about__description,
+  .about__statement {
+    margin-top: 0;
+    max-width: 100%;
+    line-height: 1.7;
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: none;
+  }
+
+  .about__inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

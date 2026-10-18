@@ -536,6 +536,12 @@
     }
 }
 
+@media (max-width: 639px) {
+    .hero {
+        padding-bottom: 5rem;
+    }
+}
+
 @media (max-width: 420px) {
     .navbar__name {
         display: none;

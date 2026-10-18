@@ -14,6 +14,7 @@ function Hero({
     const [activeSection, setActiveSection] = useState('home')
     const [viewportWidth, setViewportWidth] = useState(window.innerWidth)
     const [isCvDialogOpen, setIsCvDialogOpen] = useState(false)
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
     useEffect(() => {
         const handleResize = () => setViewportWidth(window.innerWidth)
@@ -54,6 +55,22 @@ function Hero({
 
         return () => observer.disconnect()
     }, [])
+
+    useEffect(() => {
+        if (!isMobileMenuOpen) return
+
+        function handleKeyDown(event) {
+            if (event.key === 'Escape') {
+                setIsMobileMenuOpen(false)
+            }
+        }
+
+        document.addEventListener('keydown', handleKeyDown)
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown)
+        }
+    }, [isMobileMenuOpen])
 
     const handleThemeToggle = (e) => {
         const rect = e.currentTarget.getBoundingClientRect()
@@ -123,6 +140,19 @@ function Hero({
                 }}
             >
                 <div className="navbar__inner container">
+                    <button
+                        className={`navbar__menu-toggle${isMobileMenuOpen ? ' is-open' : ''}`}
+                        type="button"
+                        aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+                        aria-expanded={isMobileMenuOpen}
+                        aria-controls="mobile-navigation"
+                        onClick={() => setIsMobileMenuOpen(previous => !previous)}
+                    >
+                        <span />
+                        <span />
+                        <span />
+                    </button>
+
                     <a className="navbar__brand" href="#home" aria-label="Go to home">
                         <svg className="navbar__logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" aria-hidden="true">
                             <path fill="currentColor" fillRule="evenodd" d="
@@ -206,6 +236,48 @@ function Hero({
                     </div>
                 </div>
             </motion.header>
+
+            {isMobileMenuOpen && (
+                <div
+                    className="mobile-menu"
+                    onMouseDown={event => {
+                        if (event.target === event.currentTarget) {
+                            setIsMobileMenuOpen(false)
+                        }
+                    }}
+                >
+                    <nav
+                        id="mobile-navigation"
+                        className="mobile-menu__nav"
+                        aria-label="Mobile navigation"
+                    >
+                        {[
+                            { label: 'Home', href: '#home', id: 'home' },
+                            { label: 'About', href: '#about', id: 'about' },
+                            { label: 'Projects', href: '#projects', id: 'projects' },
+                            { label: 'Contact', href: '#contact', id: 'contact' },
+                        ].map(item => (
+                            <a
+                                key={item.id}
+                                className={`mobile-menu__link${activeSection === item.id ? ' is-active' : ''}`}
+                                href={item.href}
+                                aria-current={activeSection === item.id ? 'location' : undefined}
+                                onClick={event => {
+                                    setIsMobileMenuOpen(false)
+
+                                    if (item.id === 'contact') {
+                                        event.preventDefault()
+                                        onContactOpen()
+                                    }
+                                }}
+                            >
+                                <span>{item.label}</span>
+                                <span className="mobile-menu__arrow" aria-hidden="true">↗</span>
+                            </a>
+                        ))}
+                    </nav>
+                </div>
+            )}
 
             <section className="hero" id="home">
                 <div className="hero__content">

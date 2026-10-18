@@ -1,5 +1,39 @@
 /* Shared page layout */
 
+.portfolio-shell {
+  position: relative;
+  isolation: isolate;
+  background: #1b1b1b;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.portfolio-glow {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: min(1000px, 100vw);
+  height: min(750px, 100vh);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 0;
+
+  background: radial-gradient(
+    ellipse at center,
+    rgba(233, 32, 79, 0.09) 0%,
+    rgba(233, 32, 79, 0.045) 35%,
+    rgba(233, 32, 79, 0.015) 60%,
+    transparent 75%
+  );
+}
+
+.portfolio-shell > main,
+.portfolio-shell > footer {
+  position: relative;
+  z-index: 1;
+}
+
 .page {
   min-height: 100vh;
   overflow-x: clip;

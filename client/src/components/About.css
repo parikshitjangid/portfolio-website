@@ -1,0 +1,106 @@
+.about__visual {
+    position: relative;
+}
+
+.about__header {
+    position: sticky;
+    top: 100px;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: min(100%, 1200px);
+    margin-inline: auto;
+    padding: 1rem 0 0.75rem;
+    margin-bottom: 16px;
+    background: transparent;
+}
+
+.about__eyebrow {
+    flex-shrink: 0;
+    color: #f3f3f3;
+    font-family: "Aeonik Pro", sans-serif;
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    transition: color 800ms ease;
+}
+
+.theme-light .about__eyebrow {
+    color: #e9204f;
+}
+
+.about__line {
+    width: 48px;
+    height: 1px;
+    background: #e9204f;
+}
+
+.about {
+    position: relative;
+    width: 100%;
+    padding: 0 1.5rem;
+    background: transparent;
+    color: #f3f3f3;
+    font-family: "Aeonik Pro", sans-serif;
+}
+
+.about__content {
+    width: min(100%, 1080px);
+    margin-inline: auto;
+    padding: 2.25rem 2rem 2rem;
+    overflow: visible;
+}
+
+.about__statement {
+    margin: 0;
+    color: #ffffff;
+    font-family: "Aeonik Pro", sans-serif;
+    font-size: clamp(1.25rem, 2.5vw, 2.5rem);
+    font-weight: 700;
+    line-height: 1.18;
+    letter-spacing: -0.025em;
+    text-align: left;
+}
+
+.about__name-highlight {
+    color: #e9204f;
+}
+
+.about__highlights {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #414141;
+}
+
+.about__highlight p {
+    margin: 0 0 0.75rem;
+    color: #e9204f;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+}
+
+.about__highlight span {
+    font-size: 1rem;
+    color: #f3f3f3;
+}
+
+@media (max-width: 640px) {
+    .about__content {
+        padding-inline: 1rem;
+    }
+
+    .about__highlights {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+        margin-top: 2rem;
+    }
+
+    .about__header {
+        padding-top: 1.5rem;
+    }
+}

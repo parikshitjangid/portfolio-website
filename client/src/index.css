@@ -66,6 +66,8 @@
   --color-border: #414141;
   --color-focus: #e9204f;
   --color-overlay: rgb(233 32 79 / 10%);
+  --page-glow-strong: rgba(233, 32, 79, 0.12);
+  --page-glow-soft: rgba(233, 32, 79, 0.05);
 
   font-family: "Aeonik Pro", sans-serif;
   font-weight: 400;
@@ -202,9 +204,28 @@ body {
     color var(--transition-base);
 }
 
+body {
+  background: #1b1b1b;
+}
+
 #root {
+  position: relative;
   min-height: 100vh;
   isolation: isolate;
+}
+
+#root::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(
+        ellipse 55% 55% at 50% 45%,
+        var(--page-glow-strong) 0%,
+        var(--page-glow-soft) 45%,
+        transparent 75%
+    );
 }
 
 h1,

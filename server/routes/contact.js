@@ -1,23 +1,83 @@
 import { Router } from 'express'
-import nodemailer from 'nodemailer'
 import Contact from '../models/Contact.js'
 
 const router = Router()
 
-function createMailer() {
-  const { GMAIL_USER, GMAIL_APP_PASSWORD } = process.env
+async function sendContactNotification({ name, email, message }) {
+  const {
+    GMAIL_USER,
+    GMAIL_CLIENT_ID,
+    GMAIL_CLIENT_SECRET,
+    GMAIL_REFRESH_TOKEN,
+    CONTACT_NOTIFICATION_EMAIL,
+  } = process.env
 
-  if (!GMAIL_USER || !GMAIL_APP_PASSWORD) {
-    return null
+  if (!GMAIL_USER || !GMAIL_CLIENT_ID || !GMAIL_CLIENT_SECRET || !GMAIL_REFRESH_TOKEN) {
+    console.warn('Contact notification email skipped: Gmail API environment variables are not fully configured.')
+    return false
   }
 
-  return nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: GMAIL_USER,
-      pass: GMAIL_APP_PASSWORD.replace(/\s/g, ''),
-    },
+  const recipient = CONTACT_NOTIFICATION_EMAIL || GMAIL_USER
+
+  const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: GMAIL_CLIENT_ID,
+      client_secret: GMAIL_CLIENT_SECRET,
+      refresh_token: GMAIL_REFRESH_TOKEN,
+      grant_type: 'refresh_token',
+    }),
+    signal: AbortSignal.timeout(10000),
   })
+
+  const tokenData = await tokenResponse.json()
+
+  if (!tokenResponse.ok || !tokenData.access_token) {
+    throw new Error(tokenData.error_description || tokenData.error || 'Google OAuth token request failed.')
+  }
+
+  const subject = Buffer.from(`New portfolio message from ${name}`, 'utf8').toString('base64')
+  const body = [
+    'You received a new message through your portfolio contact form.',
+    '',
+    `Name: ${name}`,
+    `Email: ${email}`,
+    '',
+    'Message:',
+    message,
+  ].join('\n')
+
+  const mimeMessage = [
+    `From: Portfolio Contact Form <${GMAIL_USER}>`,
+    `To: ${recipient}`,
+    `Reply-To: ${name.replace(/[\r\n]+/g, ' ')} <${email}>`,
+    `Subject: =?UTF-8?B?${subject}?=`,
+    'MIME-Version: 1.0',
+    'Content-Type: text/plain; charset=UTF-8',
+    'Content-Transfer-Encoding: 8bit',
+    '',
+    body,
+  ].join('\r\n')
+
+  const raw = Buffer.from(mimeMessage, 'utf8').toString('base64url')
+
+  const mailResponse = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${tokenData.access_token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ raw }),
+    signal: AbortSignal.timeout(10000),
+  })
+
+  if (!mailResponse.ok) {
+    const errorData = await mailResponse.json().catch(() => ({}))
+    throw new Error(errorData.error?.message || 'Gmail API send request failed.')
+  }
+
+  return true
 }
 
 router.post('/', async (req, res) => {
@@ -60,29 +120,14 @@ router.post('/', async (req, res) => {
       message: cleanMessage,
     })
 
-    const mailer = createMailer()
-    const recipient = process.env.CONTACT_NOTIFICATION_EMAIL || process.env.GMAIL_USER
-
-    if (mailer && recipient) {
-      try {
-        await mailer.sendMail({
-          from: {
-            name: 'Portfolio Contact Form',
-            address: process.env.GMAIL_USER,
-          },
-          to: recipient,
-          replyTo: {
-            name: cleanName,
-            address: cleanEmail,
-          },
-          subject: `New portfolio message from ${cleanName}`,
-          text: `You received a new message through your portfolio contact form.\n\nName: ${cleanName}\nEmail: ${cleanEmail}\n\nMessage:\n${cleanMessage}\n`,
-        })
-      } catch (emailError) {
-        console.error('Contact notification email failed:', emailError.message)
-      }
-    } else {
-      console.warn('Contact notification email skipped: Gmail environment variables are not configured.')
+    try {
+      await sendContactNotification({
+        name: cleanName,
+        email: cleanEmail,
+        message: cleanMessage,
+      })
+    } catch (emailError) {
+      console.error('Contact notification email failed:', emailError.message)
     }
 
     return res.status(201).json({

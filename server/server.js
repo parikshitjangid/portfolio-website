@@ -9,15 +9,19 @@ const app = express()
 const port = process.env.PORT || 5000
 const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:5173')
   .split(',')
-  .map(origin => origin.trim())
+  .map(origin => origin.trim().replace(/\/$/, ''))
   .filter(Boolean)
+
+const productionOrigin = 'https://portfolio-website-murex-beta-82.vercel.app'
 
 app.use(cors({
   origin(origin, callback) {
-    const isConfiguredOrigin = !origin || allowedOrigins.includes(origin)
-    const isVercelPreview = /^https:\/\/portfolio-website-[a-z0-9-]+-keyzorkinza-gmailcoms-projects\.vercel\.app$/.test(origin || '')
+    const normalizedOrigin = origin?.replace(/\/$/, '')
+    const isConfiguredOrigin = !origin || allowedOrigins.includes(normalizedOrigin)
+    const isProductionOrigin = normalizedOrigin === productionOrigin
+    const isVercelPreview = /^https:\/\/portfolio-website-[a-z0-9-]+-keyzorkinza-gmailcoms-projects\.vercel\.app$/.test(normalizedOrigin || '')
 
-    callback(null, isConfiguredOrigin || isVercelPreview)
+    callback(null, isConfiguredOrigin || isProductionOrigin || isVercelPreview)
   },
 }))
 app.use(express.json({ limit: '10kb' }))

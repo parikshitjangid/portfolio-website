@@ -1,7 +1,24 @@
 import { Router } from 'express'
+import nodemailer from 'nodemailer'
 import Contact from '../models/Contact.js'
 
 const router = Router()
+
+function createMailer() {
+  const { GMAIL_USER, GMAIL_APP_PASSWORD } = process.env
+
+  if (!GMAIL_USER || !GMAIL_APP_PASSWORD) {
+    return null
+  }
+
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: GMAIL_USER,
+      pass: GMAIL_APP_PASSWORD.replace(/\s/g, ''),
+    },
+  })
+}
 
 router.post('/', async (req, res) => {
   try {
@@ -42,6 +59,31 @@ router.post('/', async (req, res) => {
       email: cleanEmail,
       message: cleanMessage,
     })
+
+    const mailer = createMailer()
+    const recipient = process.env.CONTACT_NOTIFICATION_EMAIL || process.env.GMAIL_USER
+
+    if (mailer && recipient) {
+      try {
+        await mailer.sendMail({
+          from: {
+            name: 'Portfolio Contact Form',
+            address: process.env.GMAIL_USER,
+          },
+          to: recipient,
+          replyTo: {
+            name: cleanName,
+            address: cleanEmail,
+          },
+          subject: `New portfolio message from ${cleanName}`,
+          text: `You received a new message through your portfolio contact form.\n\nName: ${cleanName}\nEmail: ${cleanEmail}\n\nMessage:\n${cleanMessage}\n`,
+        })
+      } catch (emailError) {
+        console.error('Contact notification email failed:', emailError.message)
+      }
+    } else {
+      console.warn('Contact notification email skipped: Gmail environment variables are not configured.')
+    }
 
     return res.status(201).json({
       success: true,
